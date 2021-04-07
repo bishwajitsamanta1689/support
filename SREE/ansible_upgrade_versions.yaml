@@ -25,3 +25,15 @@
 
     - debug:
         msg: System has Ansible Version {{version.stdout_lines}}
+
+    - name: "Install Ansible Tower"
+      get_url:
+        url: https://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-latest.tar.gz
+        dest: /tmp
+      become_user: root
+
+    - name: "Extract the Ansible Tower Tar Ball"
+      unarchive:
+        src: /tmp/ansible-tower-setup-latest.tar.gz
+        dest: /tmp
+      become_user: root
