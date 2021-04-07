@@ -1,0 +1,27 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  become: yes
+  become_user: root
+
+  tasks:
+    - name: "Downloading Epel release"
+      get_url:
+        url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+        dest: /tmp
+
+    - name: "Installing Epel Release"
+      yum:
+        name: /tmp/epel-release-latest-7.noarch.rpm
+        state: present
+
+    - name: "Upgrade Ansible"
+      yum:
+        name: ansible
+
+    - name: "Printing the Ansible Version"
+      shell: ansible --version
+      register: version
+
+    - debug:
+        msg: System has Ansible Version {{version.stdout_lines}}
