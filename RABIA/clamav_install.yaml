@@ -1,0 +1,117 @@
+---
+- name: "*** ClamAV install ***"
+  hosts: testslaves
+  become: true
+  become_user: root
+
+  tasks:
+
+    - name: yum remove epel release
+      shell: "yum remove epel-release -y"
+
+    - name: scp epel7
+      copy:
+      src: /ccx/home/rrbilal/clamav/2020-clamav/epel7/epel.repo
+      dest: /etc/yum.repos.d/
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+    - name: scp epel7
+      copy:
+      src: /ccx/home/rrbilal/clamav/2020-clamav/epel7/epel-testing.repo
+      dest: /etc/yum.repos.d/
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+    - name: scp epel7
+      copy:
+        src: /ccx/home/rrbilal/clamav/2020-clamav/epel7/RPM-GPG-KEY-EPEL-7
+        dest: /etc/pki/rpm-gpg/
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+    - name: lib rpm
+      copy:
+        src: /ccx/home/rrbilal/clamav/2020-clamav/pcre2-10.23-2.el7.x86_64.rpm
+        dest: /tmp/
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+    - name: scp epel6
+      copy:
+        src: /ccx/home/rrbilal/clamav/2020-clamav/epel6/epel-testing.repo
+        dest: /etc/yum.repos.d/
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+    - name: scp epel6
+      copy:
+        src: /ccx/home/rrbilal/clamav/2020-clamav/epel6/epel.repo
+        dest: /etc/yum.repos.d/
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+    - name: scp epel6
+      copy:
+        src: /ccx/home/rrbilal/clamav/2020-clamav/epel6/RPM-GPG-KEY-EPEL-6
+        dest: /etc/pki/rpm-gpg/
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+    - name: Install CLAM AV on rhel 6
+      yum:
+        name:
+          - clamav
+          - clamd
+        state: present
+        enablerepo: "epel"
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+    - name: Install CLAM AV on Centos 7
+      yum:
+        name:
+          - clamav-server
+          - clamav-data
+          - clamav-update
+          - clamav-filesystem
+          - clamav
+          - clamd
+          - clamav-scanner-systemd
+          - clamav-devel
+          - clamav-lib
+          - clamav-server-systemd
+        state: present
+        enablerepo: "epel"
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+    - name: Create file
+      file:
+        path: /var/log/clamd.scan
+        owner: clam
+        group: clam
+        mode: '0644'
+        state: touch
+
+    - name: freshclam command
+      shell: "freshclam"
+
+    - name: Editing scan.conf
+      template:
+        src: /ccx/home/rrbilal/clamav/2020-clamav/scan.conf.j2
+        dest: /etc/clamd.d/scan.conf
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+    - name: Enable clamav service
+      service:
+        name: clamd
+        enabled: yes
+        state: started
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+    - name: Enable clamav service
+      service:
+        name: clamd@scan
+        enabled: yes
+        state: started
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+    - name: redirection script
+      template:
+        src: /ccx/home/rrbilal/clamav/2020-clamav/redirect-clamav.sh.j2
+        dest: /usr/local/src/
+
+    - name: Making file executable
+      shell: chmod +x /usr/local/src/redirect-clamav.sh.j2
