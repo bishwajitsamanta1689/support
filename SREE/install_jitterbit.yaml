@@ -1,0 +1,21 @@
+---
+- name: "*** Jitterbit install ***"
+  hosts: localhost
+  become: true
+  become_user: root
+  gather_facts: no
+
+  tasks:
+   - name: "Copy Gateway Config Yaml"
+     copy:
+       src: /usr/local/openresty/nginx/conf/onpremise/gatewayconfig.yaml
+       dest: /home/apim
+       remote_src: yes
+
+   - name: "Install Latest Version"
+     yum:
+      name: /tmp/jitterbit-api-gateway-10.33.0-4.x86_64.rpm
+      state: present
+
+   - name: "Restart the Jitterbit Api Gateway Config"
+     shell: /usr/bin/jitterbit-api-gateway-config -s restart
