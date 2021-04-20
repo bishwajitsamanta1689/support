@@ -23,6 +23,7 @@
       unarchive:
         src: "{{ destination }}/ansible-tower-{{version_old}}.tar.gz"
         dest: "{{ destination }}"
+        remote_src: yes
       become_user: root
       tags:
       - upgrade_36
@@ -39,6 +40,7 @@
       unarchive:
         src: "{{ destination }}/ansible-tower-{{version_new}}.tar.gz"
         dest: "{{ destination }}"
+        remote_src: yes
       become_user: root
       tags:
       - upgrade_38
@@ -47,6 +49,7 @@
       copy:
         src: inventory
         dest: "{{ destination }}/ansible-tower-{{version_old}}/inventory"
+        remote_src: yes
       tags:
       - upgrade_36
 
@@ -54,6 +57,7 @@
       copy:
         src: inventory
         dest: "{{ destination }}/ansible-tower-{{version_new}}/inventory"
+        remote_src: yes
       tags:
       - upgrade_38
 
