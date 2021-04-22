@@ -5,40 +5,23 @@
   become_user: root
 
   vars:
-   destination: /apps/tower
+   destination: /home/cloud_user
    version_old: 3.6.0-1
    version_new: 3.8.2-1
 
   tasks:
-
-    - name: "Download Ansible Tower 3.6"
-      get_url:
-        url: "https://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-{{version_old}}.tar.gz"
-        dest: "{{ destination }}"
-      become_user: root
-      tags:
-      - upgrade_36
-
-    - name: "Extract the Ansible Tower 3.6 Tar Ball"
+    - name: "Download and Extract the Ansible Tower 3.6 Tar Ball"
       unarchive:
-        src: "{{ destination }}/ansible-tower-{{version_old}}.tar.gz"
+        src: "https://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-{{version_old}}.tar.gz"
         dest: "{{ destination }}"
         remote_src: yes
       become_user: root
       tags:
       - upgrade_36
 
-    - name: "Download Ansible Tower 3.8"
-      get_url:
-        url: "https://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-{{version_old}}.tar.gz"
-        dest: "{{ destination }}"
-      become_user: root
-      tags:
-      - upgrade_38
-
-    - name: "Extract the Ansible Tower 3.8 Tar Ball"
+    - name: "Download and Extract the Ansible Tower 3.8 Tar Ball"
       unarchive:
-        src: "{{ destination }}/ansible-tower-{{version_new}}.tar.gz"
+        src: "https://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-{{version_new}}.tar.gz"
         dest: "{{ destination }}"
         remote_src: yes
       become_user: root
@@ -48,29 +31,33 @@
     - name: "Copy the inventory template"
       copy:
         src: inventory
-        dest: "{{ destination }}/ansible-tower-{{version_old}}/inventory"
-        remote_src: yes
+        dest: "{{ destination }}/ansible-tower-setup-{{version_old}}"
+        owner: cloud_user
+        group: cloud_user
+        mode: 0644
       tags:
       - upgrade_36
 
     - name: "Copy the inventory template"
       copy:
         src: inventory
-        dest: "{{ destination }}/ansible-tower-{{version_new}}/inventory"
-        remote_src: yes
+        dest: "{{ destination }}/ansible-tower-setup-{{version_new}}"
+        owner: cloud_user
+        group: cloud_user
+        mode: 0644
       tags:
       - upgrade_38
 
     - name: "Run Ansible tower"
       shell: "sudo ./setup.sh"
       args:
-        chdir: "/apps/tower/ansible-tower-{{version_old}}"
+        chdir: "{{ destination }}/ansible-tower-setup-{{version_old}}"
       tags:
       - upgrade_36
 
     - name: "Run Ansible tower"
       shell: "sudo ./setup.sh"
       args:
-        chdir: "/apps/tower/ansible-tower-{{version_new}}"
+        chdir: "{{ destination }}/ansible-tower-setup-{{version_new}}"
       tags:
       - upgrade_38
