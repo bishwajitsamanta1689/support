@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  gather_facts: no
+  become: yes
+  become_user: root
+
+  tasks:
+  - name: "Upgrade SSH configuration"
+    replace:
+      dest: /etc/ssh/sshd_config
+      regexp: '^Ciphers 3des-cbc,aes128-cbc,aes128-ctr,aes192-ctr,aes256-ctr'
+      replace: 'Ciphers aes128-cbc,aes192-ctr,aes256-ctr'
+
+  - name: "Restart SSH"
+    service:
+      name: sshd
+      state: restarted
