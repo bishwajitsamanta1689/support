@@ -5,11 +5,17 @@
   become_user: root
 
   tasks:
-  - name: "Upgrade SSH configuration"
-    replace:
-      dest: /etc/ssh/sshd_config
+  - name: "Comment Ciphers Line"
+    lineinfile:
+      path: /etc/ssh/sshd_config
       regexp: '^Ciphers 3des-cbc,aes128-cbc,aes128-ctr,aes192-ctr,aes256-ctr'
-      replace: 'Ciphers aes128-cbc,aes192-ctr,aes256-ctr'
+      line: '# Ciphers 3des-cbc,aes128-cbc,aes128-ctr,aes192-ctr,aes256-ctr'
+
+  - name: "Upgrade SSH configuration"
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      line: 'Ciphers aes128-cbc,aes192-ctr,aes256-ctr'
+      insertafter: '# Ciphers 3des-cbc,aes128-cbc,aes128-ctr,aes192-ctr,aes256-ctr'
 
   - name: "Restart SSH"
     service:
