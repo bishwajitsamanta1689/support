@@ -1,0 +1,13 @@
+---
+- name: "*** Jitterbit install in Windows Servers ***"
+  hosts: localhost
+
+  tasks:
+- name: "Install Jitterbit Agent 10.33.0.25"
+  win_package:
+    path: C:\Users\sp0066\Downloads\jitterbit-agent-10.33.0.25.exe
+    state: present
+    arguments:
+    - /install
+    - /passive
+    - /norestart
