@@ -3,11 +3,24 @@
   hosts: localhost
 
   tasks:
-- name: "Install Jitterbit Agent 10.33.0.25"
-  win_package:
-    path: C:\Users\sp0066\Downloads\jitterbit-agent-10.33.0.25.exe
-    state: present
-    arguments:
-    - /install
-    - /passive
-    - /norestart
+    - name: "Copy From S3 to LocalSystem"
+      aws_s3:
+        bucket: dfc-infrastructure-deployment1
+        object: jitterbit-agent-10.33.0.25.exe
+        dest: /tmp
+        mode: get
+      delegate_to: localhost
+
+    - name: copy to win server
+      win_copy:
+        src: /tmp/jitterbit-agent-10.33.0.25.exe
+        dest: C:\Users\sp0066\Downloads\
+
+    - name: "Install Jitterbit Agent 10.33.0.25"
+      win_package:
+        path: C:\Users\sp0066\Downloads\jitterbit-agent-10.33.0.25.exe
+        state: present
+        arguments:
+        - /install
+        - /passive
+        - /norestart
