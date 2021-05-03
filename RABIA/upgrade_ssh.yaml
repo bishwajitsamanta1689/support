@@ -8,7 +8,7 @@
   - name: "Comment Ciphers Line"
     lineinfile:
       path: /etc/ssh/sshd_config
-      regexp: '^Ciphers 3des-cbc,aes128-cbc,aes128-ctr,aes192-ctr,aes256-ctr'
+      regexp: '^Ciphers'
       line: '# Ciphers 3des-cbc,aes128-cbc,aes128-ctr,aes192-ctr,aes256-ctr'
 
   - name: "Upgrade SSH configuration"
