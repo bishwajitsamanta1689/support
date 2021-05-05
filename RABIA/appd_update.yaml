@@ -14,11 +14,11 @@
     - name: "Copy from Local to Remote Servers"
       copy:
         src: /home/rrbilal/AppServerAgent-21.4.0.32403.zip
-        dest: /opt/appdynamics/appagent
+        dest: /tmp
 
     - name: "Unzipping the Appd App Agent to Respective Location"
       unarchive:
-        src: /opt/appdynamics/appagent/AppServerAgent-21.4.0.32403.zip
+        src: /tmp/appdynamics/appagent/AppServerAgent-21.4.0.32403.zip
         dest: /opt/appdynamics/appagent
       remote_src: yes
 
