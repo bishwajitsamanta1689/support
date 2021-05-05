@@ -1,0 +1,19 @@
+---
+- name: "*** Appd App Agent Upgrade ***"
+  hosts: testslaves
+  become: true
+  become_user: root
+
+  tasks:
+    - name: "Copy from Local to Remote Servers"
+      copy:
+        src: /home/rrbilal/AppServerAgent-21.4.0.32403.zip
+        dest: /opt/appdynamics/appagent
+
+    - name: "Unzipping the Appd App Agent to Respective Location"
+      unarchive:
+        src: /opt/appdynamics/appagent/AppServerAgent-21.4.0.32403.zip
+        dest: /opt/appdynamics/appagent
+
+
+
