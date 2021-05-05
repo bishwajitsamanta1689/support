@@ -5,6 +5,12 @@
   become_user: root
 
   tasks:
+    - name: "Create AppAgent Directory"
+      file:
+        path: /opt/appdynamics/appagent
+        state: directory
+        mode: '0755'
+
     - name: "Copy from Local to Remote Servers"
       copy:
         src: /home/rrbilal/AppServerAgent-21.4.0.32403.zip
@@ -14,6 +20,7 @@
       unarchive:
         src: /opt/appdynamics/appagent/AppServerAgent-21.4.0.32403.zip
         dest: /opt/appdynamics/appagent
+      remote_src: yes
 
 
 
