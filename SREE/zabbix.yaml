@@ -1,0 +1,23 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  become: yes
+  become_user: root
+
+  tasks:
+   - name: "Copy Configuration Files"
+     win_copy:
+      src: /tmp/zabbix_agent.msi
+      dest: C:\sp0066\Downloads\
+
+   - name: "Install Zabbix Agent"
+     win_package:
+      path: C:\sp0066\Downloads\Zabbix_Agent.msi
+      arguments:
+      - /install
+      state: present
+
+   - name: "Restart the Zabbix Service"
+     win_service:
+       name: zabbix
+       state: started
