@@ -5,9 +5,14 @@
   become_user: root
 
   tasks:
-   - name: "Copy Configuration Files"
+   - name: "Copy Zabbix Agent"
      win_copy:
       src: /tmp/zabbix_agent.msi
+      dest: C:\sp0066\Downloads\
+
+   - name: "Copy Configuration Files"
+     win_copy:
+      src: /tmp/zabbix_agent.conf
       dest: C:\sp0066\Downloads\
 
    - name: "Install Zabbix Agent"
