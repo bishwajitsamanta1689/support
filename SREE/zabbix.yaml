@@ -1,28 +1,22 @@
 ---
-- hosts: localhost
+- hosts: windows
   gather_facts: yes
-  become: yes
-  become_user: root
 
   tasks:
-   - name: "Copy Zabbix Agent"
+   - name: "Copy Zabbix exe agent"
      win_copy:
-      src: /tmp/zabbix_agent.msi
+      src: zabbix_agent2.exe
       dest: C:\sp0066\Downloads\
 
    - name: "Copy Configuration Files"
      win_copy:
-      src: /tmp/zabbix_agent.conf
+      src: zabbix_agent2.win.conf
       dest: C:\sp0066\Downloads\
 
-   - name: "Install Zabbix Agent"
-     win_package:
-      path: C:\sp0066\Downloads\Zabbix_Agent.msi
-      arguments:
-      - /install
-      state: present
+   - name: Run a command under PowerShell
+     win_shell: C:\sp0066\Downloads\zabbix_agent2.exe --install
 
    - name: "Restart the Zabbix Service"
      win_service:
-       name: zabbix
+       name: Zabbix Agent 2
        state: started
