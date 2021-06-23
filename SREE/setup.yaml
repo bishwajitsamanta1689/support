@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Metadata:
   License: Apache-2.0
-Description: 'This template provisions a basic VPC architecture along with a single EC2 instance. We create a new user called cloud_user and enable password authentication for that user using a lambda function to generate the password. '
+Description: 'This template provisions Linux Servers and RDS Instance '
 #Parameters for the CFN Stack
 Parameters:
   InstanceType:
