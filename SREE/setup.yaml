@@ -64,6 +64,7 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       GroupDescription: Allow access from HTTP and SSH traffic
+      GroupName: Linux Server Security-Group
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: '80'
@@ -73,6 +74,9 @@ Resources:
           FromPort: '22'
           ToPort: '22'
           CidrIp: !Ref SSHLocation
+      Tags:
+        - Key: "Name"
+          Value: "Linux Server Security Group"
   #EC2 instance
   LinuxServerInstance1:
     Type: 'AWS::EC2::Instance'
