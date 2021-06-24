@@ -1,0 +1,36 @@
+---
+- hosts: test
+  gather_facts: true
+  become: yes
+  become_user: root
+
+  tasks:
+    - name: "Create AppAgent Directory"
+      file:
+        path: /opt/appdynamics/machine-agent
+        state: directory
+        mode: '0755'
+
+    - name: "Copy from Local to Remote Servers"
+      copy:
+        src: /home/rrbilal/MachineAgent-4.5.zip
+        dest: /tmp
+
+    - name: "Unzipping the Appd App Agent to Respective Location"
+      unarchive:
+        src: /tmp/MachineAgent-4.5.zip
+        dest: /opt/appdynamics/machine-agent
+      remote_src: yes
+
+    - name: "Replace the Hostname in Controller.xml"
+      template:
+        src: replace.j2
+        dest: /opt/appdynamics/machine-agent/conf/controller-info.xml
+        owner: ansi
+        group: ansi
+        mode: 0644
+
+    - name: "Restart Machine Agent Service"
+      service:
+        name: appdynamics-machine-agent
+        state: started
