@@ -90,6 +90,10 @@ Resources:
           VirtualName: ephemeral1
           Ebs:
             VolumeSize: 100
+        - DeviceName: /dev/sdm
+          VirtualName: ephemeral10
+          Ebs:
+            VolumeSize: 100
       Tags:
         - Key: "Name"
           Value: "Linux Server 1"
