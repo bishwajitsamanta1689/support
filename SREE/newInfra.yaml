@@ -1,0 +1,243 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "AWS Linux Test Template"
+
+Mappings:
+  EnvironmentNaming:
+    dev:
+      Name: dv
+    qa:
+      Name: qa
+    prod:
+      Name: pd
+  ISSLA:
+    dev:
+      Name: 8x5
+    qa:
+      Name: 8x5
+    prod:
+      Name: 24x7
+  Scheduler:
+    dev:
+      Name: running
+    qa:
+      Name: running
+    prod:
+      Name: running
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "General Configuration"
+        Parameters:
+          - VPCID
+          - ServerSubnetID
+          - Environment
+          - EnableTerminationProtection
+      -
+        Label:
+          default: "Application Server Configuration"
+        Parameters:
+          - ApplicationServerImageId
+          - ApplicationServerInstanceType
+          - ApplicationServerKeyName
+          - ApplicationServerRootVolumeSize
+
+    ParameterLabels:
+      # General Settings
+      VPCID:
+        default: "What VPC should this be deployed to?"
+      ServerSubnetID:
+        default: "What subnet should be used for the EC2 servers?"
+      NLBSubnet:
+        default: "What subnet should be used for the Load Balancer?"
+      Environment:
+        default: "What environment are you deploying?"
+      EnableTerminationProtection:
+        default: "Would you like to enable termination protection?"
+      # Application Server
+      ApplicationServerImageId:
+        default: "What is the AMI ID of the desired EC2 instance?"
+      ApplicationServerInstanceType:
+        default: "What instance type would you like to create?"
+      ApplicationServerKeyName:
+        default: "What is the PEM/PEK security keypair you would like to use with this instance?"
+      ApplicationServerRootVolumeSize:
+        default: "What size in GB would you like the root volume of the server to be?"
+      ApplicationServerApplicationVolumeSize:
+        default: "What size in GB would you like the Application volume of the server to be?"
+
+Parameters:
+  # General Settings
+
+  VPCID:
+    Description: VPC ID for the VPC to create the resources in.
+    Type: AWS::EC2::VPC::Id
+
+  ServerSubnetID:
+    Description: The subnet to deploy the servers to.
+    Type: AWS::EC2::Subnet::Id
+
+  Environment:
+    Description: Environment to deploy
+    Type: String
+    AllowedValues:
+      - dev
+    Default: dev
+
+  EnableTerminationProtection:
+    Description: Protect EC2 instance from deletion. Note that if this is enabled, it will have to first be disabled and deployed before you can fully tear down the stack.
+    Type: String
+    AllowedValues:
+      - true
+      - false
+    Default: false
+  # Application Server
+  ApplicationServerKeyName:
+    Description: Name of the keypair for the EC2 Application Server.
+    Type: AWS::EC2::KeyPair::KeyName
+
+  ApplicationServerInstanceType:
+    Type: String
+    AllowedValues:
+      - t3.nano
+      - t3.micro
+      - t3.small
+      - t3.medium
+      - t3.large
+      - t3.xlarge
+      - t3.2xlarge
+      - m5a.xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - m5.24xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - r5.12xlarge
+      - r5.16xlarge
+      - r5.24xlarge
+    Default: t3.micro
+
+  ApplicationServerRootVolumeSize:
+    Description: The size in GB for the root volume of the EC2 Application Server.
+    Type: Number
+    MinValue: 30
+    Default: 50
+
+  ApplicationServerApplicationVolumeSize:
+    Description: The size in GB for the Application volume of the EC2 Application Server.
+    Type: Number
+    MinValue: 30
+    Default: 100
+
+  ApplicationServerImageId:
+    Description: EC2 AMI ID for the desired server image.
+    Type: AWS::EC2::Image::Id
+    Default: ami-096fda3c22c1c990a
+
+Resources:
+  # Application Server
+  ApplicationServerRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchAgentAdminPolicy
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Tags:
+        - Key: Name
+          Value: aws-linux-test
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Service
+          Value: Application
+        - Key: Department
+          Value: IS
+        - Key: CreatedBy
+          Value: Infrastructure
+        - Key: BusinessService
+          Value: Linux OS Template
+        - Key: ManagedBy
+          Value: DFC IS
+        - Key: ISSLA
+          Value: !FindInMap [ISSLA,!Ref Environment, Name]
+
+  ApplicationServerInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref ApplicationServerRole
+
+  ApplicationServerOne:
+    Type: AWS::EC2::Instance
+    Properties:
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            Encrypted: true
+            DeleteOnTermination: false
+            VolumeSize: !Ref ApplicationServerRootVolumeSize
+            VolumeType: gp2
+        - DeviceName: /dev/sdm
+          Ebs:
+            Encrypted: true
+            DeleteOnTermination: false
+            VolumeSize: !Ref ApplicationServerApplicationVolumeSize
+            VolumeType: gp2
+      DisableApiTermination: !Ref EnableTerminationProtection
+      EbsOptimized: true
+      IamInstanceProfile: !Ref ApplicationServerInstanceProfile
+      ImageId: !Ref ApplicationServerImageId
+      InstanceType: !Ref ApplicationServerInstanceType
+      KeyName: !Ref ApplicationServerKeyName
+      Monitoring: true
+      SecurityGroupIds:
+        #- !Ref ApplicationServerSecurityGroup
+        - sg-0317361ec853e1195 # DFC Standard Allows
+      SubnetId: !Ref ServerSubnetID
+      Tags:
+        - Key: Name
+          Value: aws-linux-test
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Service
+          Value: Application
+        - Key: Department
+          Value: IS
+        - Key: CreatedBy
+          Value: Infrastructure
+        - Key: BusinessService
+          Value: Linux OS Template
+        - Key: ManagedBy
+          Value: DFC IS
+        - Key: ISSLA
+          Value: !FindInMap [ISSLA,!Ref Environment, Name]
+
+Outputs:
+  # Application Server
+  ApplicationServerOneID:
+    Value: !Ref ApplicationServerOne
+    Description: ID of the EC2 application server.
+
+  ApplicationServerRole:
+    Value: !GetAtt ApplicationServerRole.Arn
+    Description: Arn of the role for the application server.
