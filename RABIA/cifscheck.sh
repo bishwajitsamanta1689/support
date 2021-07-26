@@ -10,5 +10,6 @@ then
 else
   echo "`date` Cifs Check Started.."
   echo "`date` Need to check CIFS Mounts!" >> /tmp/cifs_not_mount.txt
+  mount -a
 fi
 
