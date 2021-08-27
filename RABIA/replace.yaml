@@ -1,0 +1,13 @@
+---
+- hosts: localhost
+  become: yes
+  become_user: root
+  gather_facts: false
+
+  tasks:
+    - name: "Replace IP with DNS"
+      replace:
+        dest: data.yml.j2
+        regexp: '10.100.32.39'
+        replace: 'prodlogstash.ccx.carecentrix.com'
+        backup: yes 
