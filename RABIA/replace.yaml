@@ -5,9 +5,16 @@
   gather_facts: false
 
   tasks:
-    - name: "Replace IP with DNS"
-      replace:
-        dest: data.yml.j2
-        regexp: '10.100.32.39'
-        replace: 'prodlogstash.ccx.carecentrix.com'
-        backup: yes 
+    - name: "Comment out hosts"
+      lineinfile:
+        path: data.yml.j2
+        # search_string: 'hosts: ["10.100.32.39:5044"]'
+        regexp: 'hosts:'
+        line: '  hosts: ["p1apelk306:5044", "p1apelk307:5044"]'
+
+
+    - name: "Add details about Host and Load Balancer"
+      lineinfile:
+        path: data.yml.j2
+        insertbefore: 'newvalue'
+        line: 'loadbalance: true'
