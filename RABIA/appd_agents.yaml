@@ -1,0 +1,22 @@
+---
+- hosts: all
+  become: yes
+  become_user: root
+  gather_facts: true
+
+  vars_prompt:
+    - name: app_name
+      prompt: "Please enter the application name:"
+      private: no
+
+    - name: tier_name
+      prompt: "Please enter the tier name:"
+      private: no
+
+  tasks:
+    - name: "Replace the Hostname in Controller.xml"
+      template:
+        src: replace_appd.j2
+        dest: /tmp/controller-info.xml
+        mode: 0644
+      when: "'biggroup' in {{ group_names }}"
