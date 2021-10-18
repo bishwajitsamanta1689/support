@@ -1,0 +1,31 @@
+---
+- hosts: all
+  become: yes
+  become_user: root
+  gather_facts: true
+
+  tasks:
+    - name: "Create Directory"
+      file:
+        path: /etc/yum.repos.d/repobkp
+        state: directory
+
+    - name: "Prepare List of files to copy"
+      find:
+        paths: /etc/yum.repos.d
+        patterns: 'epel*,swiagent*'
+        excludes: 'redhat.repo'
+      delegate_to: localhost
+      register: target_files
+
+    - name: "copy files to other place"
+      copy:
+        src: "{{ item.path }}"
+        dest: /etc/yum.repos.d/repobkp
+      with_items: "{{ target_files.files }}"
+
+    - name: "Remove old Files"
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ target_files.files }}"
