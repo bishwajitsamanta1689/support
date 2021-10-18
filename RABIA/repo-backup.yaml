@@ -13,7 +13,7 @@
     - name: "Prepare List of files to copy"
       find:
         paths: /etc/yum.repos.d
-        patterns: 'epel*,swiagent*'
+        patterns: '*'
         excludes: 'redhat.repo'
       delegate_to: localhost
       register: target_files
