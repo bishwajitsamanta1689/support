@@ -1,0 +1,28 @@
+---
+- name: "*** Firewall Enable in RHEL6 ***"
+  hosts: testslaves
+  become: true
+  become_user: root
+
+  tasks:
+    - name: "Check if Iptables is Running"
+      shell: "service iptables status"
+      register: iptablestatus
+      ignore_errors: yes
+      args:
+        warn: false
+
+    - name: "Iptable is not enabled"
+      debug:
+          msg: "Iptable is not enabled"
+      when:  iptablestatus.rc > 0
+
+    - name: "Start Iptables service"
+      service:
+        name: iptables
+        state: started
+      when: iptablestatus.rc > 0
+
+    - name: "Open all Ports"
+      shell: iptables -A INPUT -p tcp --match multiport --dports 1:65553 -j ACCEPT
+      when: iptablestatus.rc > 0
