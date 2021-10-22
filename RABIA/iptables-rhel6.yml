@@ -24,5 +24,9 @@
       when: iptablestatus.rc > 0
 
     - name: "Open all Ports"
-      shell: iptables -A INPUT -p tcp --match multiport --dports 1:65553 -j ACCEPT
+      shell: iptables -A INPUT -p tcp --match multiport --dports 1:65535 -j ACCEPT && iptables -A INPUT -p udp --match multiport --dports 1:65535 -j ACCEPT
+      when: iptablestatus.rc > 0
+
+    - name: "Save Iptables Changes"
+      shell: service iptables save
       when: iptablestatus.rc > 0
